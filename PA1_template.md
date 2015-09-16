@@ -1,16 +1,12 @@
----
-title: "Reproducible Research: Peer Assessment 1"
-output: 
-  html_document:
-    keep_md: true
----
+# Reproducible Research: Peer Assessment 1
 
 
 ## Loading and preprocessing the data
 
 ### 1. Load the data (i.e. ```read.csv()```)
 
-```{r prereq-1}
+
+```r
     rm(list=ls())
     
     csv <- read.csv("activity.csv")
@@ -21,12 +17,20 @@ output:
 In addition to setting global options, the time field is padded with zeros for a 
 uniform 4-character field width.
     
-```{r prereq-2}
+
+```r
     knitr::opts_chunk$set(fig.width=10, 
                    fig.height=6,
                    echo=TRUE)
 
     require(stringr)    
+```
+
+```
+## Loading required package: stringr
+```
+
+```r
     csv$interval <- str_pad(csv$interval, 4, pad = "0") 
 ```
 
@@ -47,7 +51,8 @@ a bar plot (right) is more appropriate for visualizing the total steps
 (*y-axis*) over time (*x-axis*). Both plots of ```stepsByDay``` are included 
 below to illustrate the difference.
 
-```{r ques1-1}
+
+```r
     stepsByDay <- tapply(csv$steps, as.Date(csv$date), sum)
     
     par(mfrow = c(1, 2))    
@@ -65,9 +70,12 @@ below to illustrate the difference.
          )
 ```
 
+![](PA1_template_files/figure-html/ques1-1-1.png) 
+
 ### 2. Calculate and report the mean and median total number of steps taken per day
 
-``` {r ques1-2, echo=TRUE}
+
+```r
     meansteps <- mean(stepsByDay, na.rm = TRUE)
 
     mediansteps <- median(stepsByDay, na.rm = TRUE)
@@ -75,8 +83,12 @@ below to illustrate the difference.
     c(meansteps, mediansteps)
 ```
 
+```
+## [1] 10766.19 10765.00
+```
+
 The mean and median total number of steps taken per day are 
-**`r I(format(meansteps, scientific = FALSE))`** and **`r I(mediansteps)`**, 
+**10766.19** and **10765**, 
 respectively. The summarized data is already available in the ```stepsByDay```
 array, so the ```mean``` and ```median``` functions are used to calculate those
 values.
@@ -89,7 +101,8 @@ values.
 The line plot below shows the average number of steps for each of the five 
 minute intervals.
 
-```{r ques2-1}
+
+```r
     stepsByTime <- aggregate(csv$steps, list(csv$interval), mean, na.rm = TRUE)    
     names(stepsByTime) <- paste(c("interval", "steps"))
     
@@ -100,9 +113,12 @@ minute intervals.
     )
 ```
 
+![](PA1_template_files/figure-html/ques2-1-1.png) 
+
 
 ### 2. Which 5-minute interval, on average across all the days in the dataset, contains the maximum number of steps?
-```{r ques2-2}
+
+```r
     maxSteps <- max(stepsByTime$steps)
 
     peakSteps <- stepsByTime[stepsByTime$steps == maxSteps,]
@@ -110,19 +126,29 @@ minute intervals.
     peakSteps
 ```
 
+```
+##     interval    steps
+## 104     0835 206.1698
+```
+
 The time interval with the maximum average number of steps is 
-**`r I(peakSteps$time)`**, with an average of **`r I(peakSteps$steps)`** steps.
+****, with an average of **206.1698113** steps.
 
 
 ## Imputing missing values
 
 ### 1. Calculate and report the total number of missing values in the dataset (i.e. the total number of rows with ```NA```s)
-```{r ques3-1}
+
+```r
     numNAs <- sum(is.na(csv$steps))
     numNAs
 ```
 
-There are ```r I(numNAs)``` ```NA``` values in the dataset.
+```
+## [1] 2304
+```
+
+There are ``2304`` ```NA``` values in the dataset.
 
 
 
@@ -133,10 +159,9 @@ particular five minute interval. For the sake of clarity, the steps are
 rounded to the nearest whole number.
 
 ### 3. Create a new dataset that is equal to the original dataset but with the missing data filled in.
-```{r ques3-3}
 
-```{r ques3-2}
 
+```r
     newcsv <- csv
 
     newcsv$steps <- ifelse(is.na(newcsv$steps),
@@ -146,7 +171,6 @@ rounded to the nearest whole number.
                         newcsv$steps)
     
     newcsv$steps <- round(newcsv$steps, digits = 0)
-
 ```
 
 
@@ -154,7 +178,8 @@ rounded to the nearest whole number.
 
 For ease of comparison, the two plots are shown side-by-side below.
 
-```{r ques3-4}
+
+```r
     par(mfrow = c(1, 2))    
 
     barplot(stepsByDay, 
@@ -172,17 +197,24 @@ For ease of comparison, the two plots are shown side-by-side below.
          xlab = "Date",
          ylab = "Sum of Steps"
          )        
-````
+```
+
+![](PA1_template_files/figure-html/ques3-4-1.png) 
 
 
-```{r ques3-4-1}
+
+```r
     newmeansteps <- mean(stepsByDay, na.rm = TRUE)
 
     newmediansteps <- median(stepsByDay, na.rm = TRUE)
 
     c(meansteps, newmeansteps, '\t',
       mediansteps, newmediansteps)
+```
 
+```
+## [1] "10766.1886792453" "10765.6393442623" "\t"               
+## [4] "10765"            "10762"
 ```
 
 ####    - Do these values differ from the estimates from the first part of the assignment? 
@@ -192,10 +224,10 @@ For ease of comparison, the two plots are shown side-by-side below.
 There are slight differences in the plot and the total mean/median estimates 
 that are visible upon close examination. Substituting the five-minute interval
 means for the ```NA``` values--instead of omitting them--changes the total daily
-mean from **`r I(format(meansteps, scientific = FALSE))`** to 
-**`r I(format(newmeansteps, scientific = FALSE))`**, and the median from 
-**`r I(format(mediansteps, scientific = FALSE))`** to 
-**`r I(format(newmediansteps, scientific = FALSE))`**.
+mean from **10766.19** to 
+**10765.64**, and the median from 
+**10765** to 
+**10762**.
 
 ## Are there differences in activity patterns between weekdays and weekends?
 
@@ -206,7 +238,5 @@ mean from **`r I(format(meansteps, scientific = FALSE))`** to
 ###     2. Make a panel plot containing a time series plot (i.e. ```type = "l"```) of the 5-minute interval (x-axis) and the average number of steps taken, averaged across all weekday days or weekend days (y-axis).
 
 
-```{r}
 
-```
 
