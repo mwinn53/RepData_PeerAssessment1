@@ -23,11 +23,19 @@ uniform 4-character field width.
                    fig.height=6,
                    echo=TRUE)
 
-    require(stringr)    
+    require(stringr)
 ```
 
 ```
 ## Loading required package: stringr
+```
+
+```r
+    require(ggplot2)
+```
+
+```
+## Loading required package: ggplot2
 ```
 
 ```r
@@ -109,7 +117,7 @@ minute intervals.
     plot(stepsByTime, type = 'l',
          main = "Average Daily Activity Pattern",
          xlab = "Time Interval",
-         ylab = "Total Number of Steps"
+         ylab = "Mean Number of Steps"
     )
 ```
 
@@ -233,10 +241,51 @@ mean from **10766.19** to
 
 *For this part the ```weekdays()``` function may be of some help here. Use the dataset with the filled-in missing values for this part.*
 
+Based on the plots below, the activity patterns during the weekdays seem to 
+spike during the morning, noon, and evening time intervals, and are lower during
+the working hours. In contrast, activity patterns during the weekend tend to 
+have more spikes--though smaller in magnitude--that are spread throughout the
+waking hours.
+
+
 ###     1. Create a new factor variable in the dataset with two levels -- "weekday" and "weekend" indicating whether a given date is a weekday or weekend day.
+
+```r
+wkday <- function(x) {
+    
+    if(x %in% c("Monday", "Tuesday", "Wednesday", "Thursday", "Friday")){
+       res <- "Weekday"
+    } else if(x %in% c("Saturday", "Sunday")) {
+        res <- "Weekend"
+    } else {
+        res <- "Other"
+    }
+    
+    res
+}
+
+newcsv$daytype <- as.factor(sapply(weekdays(as.Date(newcsv$date)), wkday))
+```
+
+
 
 ###     2. Make a panel plot containing a time series plot (i.e. ```type = "l"```) of the 5-minute interval (x-axis) and the average number of steps taken, averaged across all weekday days or weekend days (y-axis).
 
 
 
+```r
+## Subset by weekday/weekend, then average number of steps by time interval
+stepsByType <- aggregate(.~daytype+interval, newcsv, mean)
+
+qplot(interval, steps, data = stepsByType,
+    main = "",
+    xlab = "Time Interval",
+    ylab = "Mean Number of Steps",
+    facets = daytype ~ .,
+    ) + 
+    geom_line(position=position_jitter(.1),aes(group=daytype)) + 
+    scale_x_discrete(breaks = stepsByType$interval[seq(1, length(stepsByType$interval), 120)])
+```
+
+![](PA1_template_files/figure-html/unnamed-chunk-2-1.png) 
 
