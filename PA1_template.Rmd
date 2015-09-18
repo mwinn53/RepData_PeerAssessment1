@@ -18,8 +18,7 @@ output:
 
 ### 2. Process/transform the data (if necessary) into a format suitable for your analysis
 
-In addition to setting global options, the time field is padded with zeros for a 
-uniform 4-character field width.
+In addition to setting global options, the time field is padded with zeros for a uniform 4-character field width.
     
 ```{r prereq-2}
     knitr::opts_chunk$set(fig.width=10, 
@@ -28,10 +27,8 @@ uniform 4-character field width.
 
     require(stringr)
     require(ggplot2)
-    
     csv$interval <- str_pad(csv$interval, 4, pad = "0") 
 ```
-
 
 
 ## What is mean total number of steps taken per day?
@@ -40,23 +37,19 @@ uniform 4-character field width.
 
 ### 1. Make a histogram of the total number of steps taken each day
 
-The ```tapply``` function is used to sum the total number of steps measured at 
-each of the 5-minute intervals and stores the daily totals in an array called 
-```stepsByDay```.  
+The ```tapply``` function is used to add the number of steps measured each day, and storing the daily totals in an array called ```stepsByDay```.  
 
-A histogram (left) summarizes frequencies of the total steps per day, however, 
-a bar plot (right) is more appropriate for visualizing the total steps
-(*y-axis*) over time (*x-axis*). Both plots of ```stepsByDay``` are included 
-below to illustrate the difference.
-
-```{r ques1-1}
+```{r ques1-1a}
     stepsByDay <- tapply(csv$steps, as.Date(csv$date), sum)
-    
-    par(mfrow = c(1, 2))    
+```
 
-    hist(stepsByDay,
+The histogram below summarizes the number of occurrences, or frequencies, of the Total Steps per Day (*y-axis*) , grouped into 500-step intervals (*x-axis*). In contrast, a bar plot is more appropriate for visualizing the total steps (*y-axis*) in relation to time (*x-axis*). Both plots of ```stepsByDay``` are included below to illustrate the difference.
+
+```{r ques1-1b}
+    qplot(stepsByDay, binwidth = 500,
          main = "Frequency of Daily Steps",
-         xlab = "Total Number of Steps per Day",
+         col = I("red"),
+         xlab = "Sum of Steps Taken per Day",
          ylab = "Frequency"
          )
 
@@ -77,19 +70,13 @@ below to illustrate the difference.
     c(meansteps, mediansteps)
 ```
 
-The mean and median total number of steps taken per day are 
-**`r I(format(meansteps, scientific = FALSE))`** and **`r I(mediansteps)`**, 
-respectively. The summarized data is already available in the ```stepsByDay```
-array, so the ```mean``` and ```median``` functions are used to calculate those
-values.
-
+With the summarized data already available in the ```stepsByDay```array, the ```mean``` and ```median``` functions are useful. The results for the mean and median total number of steps taken per day are **`r I(format(meansteps, scientific = FALSE))`** and **`r I(mediansteps)`**, respectively. 
 
 ## What is the average daily activity pattern?
 
 ### 1. Make a time series plot (i.e. ```type = "l"```) of the 5-minute interval (x-axis) and the average number of steps taken, averaged across all days (y-axis).
 
-The line plot below shows the average number of steps for each of the five 
-minute intervals.
+The line plot below shows the mean number of steps for each of the five minute intervals.
 
 ```{r ques2-1}
     stepsByTime <- aggregate(csv$steps, list(csv$interval), mean, na.rm = TRUE)    
@@ -112,8 +99,7 @@ minute intervals.
     peakSteps
 ```
 
-The time interval with the maximum average number of steps is 
-**`r I(peakSteps$time)`**, with an average of **`r I(peakSteps$steps)`** steps.
+The time interval with the maximum average number of steps is **`r peakSteps$interval`**, with an average of **`r I(peakSteps$steps)`** steps.
 
 
 ## Imputing missing values
@@ -124,42 +110,36 @@ The time interval with the maximum average number of steps is
     numNAs
 ```
 
-There are ```r I(numNAs)``` ```NA``` values in the dataset.
-
-
+There are **`r I(numNAs)`** ```NA``` values in the dataset.
 
 ### 2. Devise a strategy for filling in all of the missing values in the dataset. The strategy does not need to be sophisticated. For example, you could use the mean/median for that day, or the mean for that 5-minute interval, etc.
 
-The strategy to handle ```NA``` values is to insert the mean value for that 
-particular five minute interval. For the sake of clarity, the steps are 
-rounded to the nearest whole number.
+```NA``` values are imputed with the mean value for that particular five minute interval. Since the number of steps is a discrete form of data, imputed values are rounded to the nearest whole number.
 
 ### 3. Create a new dataset that is equal to the original dataset but with the missing data filled in.
+
+The mean number of steps per five minute interval are already stored in the data frame ```stepsByTime```. Therefore, imputing the missing values is a simple process of matching the interval of a missing value with the corresponding mean value in ```stepsByTime```.
+
+
 ```{r ques3-3}
-
-```{r ques3-2}
-
     newcsv <- csv
 
     newcsv$steps <- ifelse(is.na(newcsv$steps),
-                        stepsByTime$steps[
-                            match(newcsv$interval, stepsByTime$interval)
-                            ],
+                        stepsByTime$steps[match(newcsv$interval, stepsByTime$interval)],
                         newcsv$steps)
     
     newcsv$steps <- round(newcsv$steps, digits = 0)
-
 ```
 
 
 ### 4. Make a histogram of the total number of steps taken each day and Calculate and report the mean and median total number of steps taken per day. 
 
-For ease of comparison, the two plots are shown side-by-side below.
+For ease of comparison, two plots are shown below. The top plot is the same histogram from question 1, which ignores the missing values in the dataset. The bottom plot is the histogram that includes the values imputed using the interval-mean strategy described in the previous section.
 
 ```{r ques3-4}
     par(mfrow = c(1, 2))    
 
-    barplot(stepsByDay, 
+    qplot(stepsByDay, binwidth = 500,
          main = "Sum of Steps Taken per Day",
          sub = "(NAs excluded)",
          xlab = "Date",
@@ -168,7 +148,7 @@ For ease of comparison, the two plots are shown side-by-side below.
 
     stepsByDay <- tapply(newcsv$steps, as.Date(newcsv$date), sum)
 
-    barplot(stepsByDay, 
+    qplot(stepsByDay, binwidth = 500,
          main = "Sum of Steps Taken per Day",
          sub = "(NAs replaced)",
          xlab = "Date",
@@ -184,30 +164,20 @@ For ease of comparison, the two plots are shown side-by-side below.
 
     c(meansteps, newmeansteps, '\t',
       mediansteps, newmediansteps)
-
 ```
 
 ####    - Do these values differ from the estimates from the first part of the assignment? 
 
 ####    - What is the impact of imputing missing data on the estimates of the total daily number of steps?
 
-There are slight differences in the plot and the total mean/median estimates 
-that are visible upon close examination. Substituting the five-minute interval
-means for the ```NA``` values--instead of omitting them--changes the total daily
-mean from **`r I(format(meansteps, scientific = FALSE))`** to 
-**`r I(format(newmeansteps, scientific = FALSE))`**, and the median from 
-**`r I(format(mediansteps, scientific = FALSE))`** to 
-**`r I(format(newmediansteps, scientific = FALSE))`**.
+There are slight differences in the plot and the total mean/median estimates that are visible upon close examination. Substituting the five-minute interval
+means for the ```NA``` values--instead of omitting them--changes the total daily mean from **`r I(format(meansteps, scientific = FALSE))`** to **`r I(format(newmeansteps, scientific = FALSE))`**, and the median from **`r I(format(mediansteps, scientific = FALSE))`** to **`r I(format(newmediansteps, scientific = FALSE))`**.
 
 ## Are there differences in activity patterns between weekdays and weekends?
 
 *For this part the ```weekdays()``` function may be of some help here. Use the dataset with the filled-in missing values for this part.*
 
-Based on the plots below, the activity patterns during the weekdays seem to 
-spike during the morning, noon, and evening time intervals, and are lower during
-the working hours. In contrast, activity patterns during the weekend tend to 
-have more spikes--though smaller in magnitude--that are spread throughout the
-waking hours.
+Based on the plots below, the activity patterns during the weekdays seem to spike during the morning, noon, and evening time intervals, and are lower during the working hours. In contrast, activity patterns during the weekend tend to have more spikes--though smaller in magnitude--that are spread throughout the waking hours.
 
 
 ###     1. Create a new factor variable in the dataset with two levels -- "weekday" and "weekend" indicating whether a given date is a weekday or weekend day.
@@ -245,7 +215,7 @@ qplot(interval, steps, data = stepsByType,
     facets = daytype ~ .,
     ) + 
     geom_line(position=position_jitter(.1),aes(group=daytype)) + 
-    scale_x_discrete(breaks = stepsByType$interval[seq(1, length(stepsByType$interval), 120)])
+    ylim(0, max(stepsByType$steps)) +
+    scale_x_discrete(breaks = stepsByType$interval[seq(1, length(stepsByType$interval), 60)])
     
 ```
-
