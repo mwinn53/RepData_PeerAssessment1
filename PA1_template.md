@@ -1,4 +1,9 @@
-# Reproducible Research: Peer Assessment 1
+---
+title: "Reproducible Research: Peer Assessment 1"
+output: 
+  html_document:
+    keep_md: true
+---
 
 
 ## Loading and preprocessing the data
@@ -23,21 +28,7 @@ In addition to setting global options, the time field is padded with zeros for a
                    echo=TRUE)
 
     require(stringr)
-```
-
-```
-## Loading required package: stringr
-```
-
-```r
     require(ggplot2)
-```
-
-```
-## Loading required package: ggplot2
-```
-
-```r
     csv$interval <- str_pad(csv$interval, 4, pad = "0") 
 ```
 
@@ -67,7 +58,7 @@ The histogram below summarizes the number of occurrences, or frequencies, of the
          )
 ```
 
-![](PA1_template_files/figure-html/ques1-1b-1.png) 
+![plot of chunk ques1-1b](figure/ques1-1b-1.png) 
 
 ```r
     barplot(stepsByDay, 
@@ -77,7 +68,7 @@ The histogram below summarizes the number of occurrences, or frequencies, of the
          )
 ```
 
-![](PA1_template_files/figure-html/ques1-1b-2.png) 
+![plot of chunk ques1-1b](figure/ques1-1b-2.png) 
 
 ### 2. Calculate and report the mean and median total number of steps taken per day
 
@@ -114,7 +105,7 @@ The line plot below shows the mean number of steps for each of the five minute i
     )
 ```
 
-![](PA1_template_files/figure-html/ques2-1-1.png) 
+![plot of chunk ques2-1](figure/ques2-1-1.png) 
 
 
 ### 2. Which 5-minute interval, on average across all the days in the dataset, contains the maximum number of steps?
@@ -187,7 +178,7 @@ For ease of comparison, two plots are shown below. The top plot is the same hist
          )
 ```
 
-![](PA1_template_files/figure-html/ques3-4-1.png) 
+![plot of chunk ques3-4](figure/ques3-4-1.png) 
 
 ```r
     stepsByDay <- tapply(newcsv$steps, as.Date(newcsv$date), sum)
@@ -200,7 +191,7 @@ For ease of comparison, two plots are shown below. The top plot is the same hist
          )        
 ```
 
-![](PA1_template_files/figure-html/ques3-4-2.png) 
+![plot of chunk ques3-4](figure/ques3-4-2.png) 
 
 
 
@@ -272,4 +263,4 @@ qplot(interval, steps, data = stepsByType,
     scale_x_discrete(breaks = stepsByType$interval[seq(1, length(stepsByType$interval), 60)])
 ```
 
-![](PA1_template_files/figure-html/unnamed-chunk-2-1.png) 
+![plot of chunk unnamed-chunk-2](figure/unnamed-chunk-2-1.png) 
